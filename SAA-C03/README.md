@@ -697,3 +697,21 @@ Transparent Insertion
 
 # "Lambda + DB 연결 수 너무 많음(too many connections)"
 -  RDS Proxy가 정답
+
+---
+
+# 예약 인스턴스
+- EC2 만 가능한 플랜
+- 예약 인스턴스는 EC2 전용입니다. Fargate는 EC2 인스턴스를 쓰지 않으므로 RI를 적용할 수 없음
+
+
+# Kinesis Data Streams  와 Amazon Data Firehose 차이
+- Kinesis Data Streams = "실시간 수집 + 여러 소비자 + 직접 제어" (컨베이어 벨트)
+  - 진짜 거의 실시(ms)
+- Firehose = "자동으로 목적지(S3 등)에 적재 + 관리 거의 없음" (자동 택배)
+  - 거의 실시간 (60초~)
+- 핵심 구분: "여러 곳에서 실시간 처리" → Streams, "S3 등에 자동 저장" → Firehose
+
+#  Amazon Managed Service for Apache Flink
+- 스트리밍 데이터를 "실시간으로 분석·처리"하는 관리형 서비스입니다.핵심을 한 줄로: "흘러가는 데이터를 실시간으로 분석하는 엔진"
+- (예전 이름: Kinesis Data Analytics → Apache Flink 기반으로 바뀌면서 이름이 변경됨)
