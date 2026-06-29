@@ -137,12 +137,12 @@ S3 File Gateway는 Storage Gateway 4종류 중 하나입니다:
 
 ---
 
-KMS 어디에 쓰이나? (실제 예시)
-대부분의 AWS 스토리지/DB 암호화가 KMS와 연결됩니다:
-
-S3 버킷 암호화 → S3에 저장되는 파일을 KMS 키로 암호화
-EBS 볼륨 암호화 → 디스크 데이터를 KMS 키로 암호화
-RDS 데이터베이스 암호화 → DB 데이터를 KMS 키로 암호화
+## KMS 어디에 쓰이나? (실제 예시)
+- KMS의 주요 기능은 암/복호화다 (복호화도 가능함)
+### 대부분의 AWS 스토리지/DB 암호화가 KMS와 연결됩니다:
+- S3 버킷 암호화 → S3에 저장되는 파일을 KMS 키로 암호화
+- EBS 볼륨 암호화 → 디스크 데이터를 KMS 키로 암호화
+- RDS 데이터베이스 암호화 → DB 데이터를 KMS 키로 암호화
 
 ---
 
@@ -513,3 +513,163 @@ VPC (10.0.0.0/16)
 - 평소에는 아무 일도 안 하고, 장애가 났을 때만 대신 일하려고 대기하는 예비 인스턴스
   - 평소에는 직접 접근·사용 불가 (오직 장애 대비용)
 - Multi-AZ 배포의 예비 DB 인스턴스. 평소엔 대기만 하고, 장애 시 자동으로 기본으로 승격
+
+
+---
+
+#  AWS Glue
+- AWS Glue = AWS의 완전관리형 ETL 서비스입니다. 위에서 본 ETL 작업을 서버 관리 없이(서버리스) 자동으로 해주는 서비스예요.
+## Glue가 하는 일
+
+- 대규모 데이터(GB~TB) ETL 작업을 자동 실행 → 데이터 추출 → 변환 → 적재를 코드/설정으로 수행
+  - 추출 -> 변환 -> 적재
+- 서버리스 → 서버를 직접 관리할 필요 없음 (AWS가 알아서 처리)
+- 데이터 카탈로그 → 데이터가 어디에 어떤 형식으로 있는지 자동으로 파악·정리
+
+---
+
+# 대규모 DDoS 방어 + 무중단 이 필요할 경우
+- Shield Advanced(전문 DDoS 방어) + CloudFront(트래픽 분산·흡수) 
+  - CloudFront는 DDoS 공격 트래픽이 엣지에서 흡수·분산되어 원본 서버(EC2)에 직접 도달하는 부담을 줄임
+---
+
+# Lambda 기준 정책 종류 → "방향"으로 결정
+
+- "남이 Lambda를 호출"(들어옴) → 리소스 기반 정책
+- "Lambda가 남에게 접근"(나감) → 실행 역할
+
+---
+
+# 미리 서명된 URL(Presigned URL)
+- "이 URL을 가진 사람은, 정해진 시간 동안, S3에 파일을 올릴(또는 받을) 수 있다"는 임시 허가가 담긴 특별한 URL입니다.
+- 임시 권한이 서명되어 들어있는 URL
+- 사용하면 EC3를 거치지 않고 바로 S3에 파일이 등록되기에 부하를 줄일 수 있음
+
+---
+# CloudFront
+- CloudFront는 별도로 인증서를 안 가져와도, 기본적으로 HTTPS를 쓸 수 있음
+  - 다만 도메인을 지정해서 쓰고 싶으면 ACM 필요
+
+---
+
+# CloudWatch Logs
+- AWS 리소스와 애플리케이션의 "로그"를 모아서 저장·관리하는 서비스입니다. (단순 관리 저장)
+-  로그를 다른 대상으로 실시간 스트리밍하는 구독(Subscription) 기능이 내장되어 있고, OpenSearch로의 전송을 기본 지원
+
+---
+# AWS Global Accelerator
+- "여러 리전의 NLB로 최적 라우팅 + 성능·가용성 + 비-HTTP(TCP/UDP)"
+- 여러 리전 엔드포인트(NLB 등)를 묶어 최적 경로 라우팅, TCP/UDP·NLB와 통합, 고정 IP
+
+---
+
+# Amazon OpenSearch Service
+- 대량의 데이터(특히 로그)를 빠르게 검색·분석하고 시각화하는 서비스
+- OpenSearch에 로그를 "저장"한다 = 검색·분석할 수 있도록 OpenSearch 안에 넣는다(진짜로 로그 데이터를 여기에 다시 저장)
+
+---
+
+# RDS 암호화
+- "기존 암호화 안 된 RDS를 암호화" → 암호화된 스냅샷을 복원해 새 인스턴스 생성 후 교체
+- RDS는 생성 후 암호화를 켤 수 없음 → 반드시 "스냅샷 암호화 → 복원(새 인스턴스)" 경로
+
+---
+
+# ACM의 SSL 종료
+- EC2 에서 SSL 처리는 올바르지 못한 방법 ALB에서 해주자
+
+---
+
+# 저장소 I/O 포퍼먼스가 가장 중요 (날라가도 괜찮을 경우)
+- EBS보다 -> EC2 Instance Store가 더 빠릅니다.
+
+---
+
+# AutoScaling의 Target Tracking Scaling(대상 추적)
+- 일정 CPU자원에 맞춰 가장 잘 실행되는 경우 사용
+```text
+CPU가 50% → EC2 추가
+CPU가 38% → 그대로 유지
+CPU가 25% → EC2 감소
+```
+
+---
+
+# Cloud Front를 사용 S3 URL 직접 접근 차단
+- S3를 Private으로 두고 OAI/OAC를 통해서만 접근 허용
+
+---
+
+#Global Accelerator
+-> 네트워크 경로를 최적화한다.
+-> S3 와 CloudFront 는 Endpoint로 사용이 불가능해
+-> UDP / 게임 / 음성
+
+---
+#Firewall Manager
+
+- 방화벽이 아니다
+
+- 여러 계정의
+  ㄴ>Network Firewall
+  ㄴ>WAF
+  ㄴ>Security Group
+
+정책을 중앙에서 관리하는 서비스
+
+---
+# Role, Policy
+- Role 에 Policy를 붙이는 개념
+- 그래서 S3나 EC2에도 Role을 사용해서 접근 권한을 컨트롤 하는것임
+---
+# AWS SAA에서는 다음 문장이 나오면 거의 Gateway Load Balancer를 선택하면 됩니다.
+
+Virtual Firewall
+Firewall Appliance
+AWS Marketplace Appliance
+IDS / IPS
+Traffic Inspection
+Deep Packet Inspection
+Transparent Insertion
+
+즉,
+
+"타사 방화벽 장비를 AWS 네트워크 경로에 자연스럽게 삽입해야 한다."
+
+---
+
+# cloudWatch 와 CloudTrail 차이
+- CloudWatch = 시스템을 모니터링하는 서비스
+- CloudTrail = AWS 계정 활동(API 호출)을 감사(Audit)하는 서비스
+
+---
+# Shield Advanced
+
+유료 서비스이며
+
+대규모 DDoS 공격에 대해
+
+더 강력한 보호
+탐지
+대응 지원(DRT)
+상세한 공격 분석
+
+을 제공
+
+---
+# AWS System Manager Session Manager
+- SSH Key 없이 접속
+- 22 Port 제거
+- 최소 운영 오버헤드
+- Well-Architected
+
+---
+
+# RDS Custom
+- OS 접근이 가능한 DB
+  - 여기서 말하는 OS 접근은 DB 서버 자체에 ssh 로 접근하여 설정 파일을 변경하거나 추가적인 툴을 설치할 수 있는 것
+
+---
+
+# AWS PrivateLink
+- 다른 VPC(또는 다른 AWS 계정)의 특정 서비스 **하나를** 프라이빗하게 연결하는 기술
