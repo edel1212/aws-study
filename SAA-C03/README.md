@@ -378,6 +378,7 @@ VPC (10.0.0.0/16)
 ### Step Functions (★ 자주 출제)
 - **시각적 상태 머신(State Machine)** 으로 워크플로를 정의·실행
 - 여러 서비스(Lambda, ECS, SNS, SQS, DynamoDB 등)를 **중앙에서 조율**
+- 여러 작업으로 구성된 작업에 적합
 - 현재 어느 단계에 있는지 **시각적으로 추적** 가능, 에러 처리·재시도 내장
 - 두 가지 워크플로:
     - **Standard**: 최대 1년 실행, 정확히 한 번 실행, 장기/감사 필요 워크플로
@@ -548,3 +549,57 @@ VPC (10.0.0.0/16)
 - VPC·서브넷 밖의 **리전 단위 서비스**
 - 프라이빗 통신 원하면 → **VPC Gateway Endpoint (S3용)**
 
+
+@@@@@@@@@@@@@@@@@2
+
+# DynamoDB Streams 
+- DynamoDB 테이블의 데이터 변경(INSERT/UPDATE/DELETE)을 순서대로 기록하여 Lambda 등의 서비스가 실시간으로 처리할 수 있도록 하는 변경 이벤트 스트림입니다.
+
+# Amazon DynamoDB Accelerator (DAX)
+- DynamoDB 전용 인메모리 캐시
+
+# ACL(Access Control List)
+- 허용(Allow)과 거부(Deny) 규칙을 적어 놓은 IP 목록(List) 개념
+
+# NACL(Network Access Control List)
+- 네트워크용 ACL (ACL을 실제로 AWS에서 사용한 것)
+- 서브넷 앞에서 패킷을 검사합니다.
+- NACL은 "서브넷 전체"를 보호 [ex) 건물 앞 경비]
+  - 비슷하지만 다른 개념 : Security Group(보안그룹)은 "각 인스턴스"를 보호 [ex) 각각의 집 도어락]
+- 순서대로 검사
+
+# Security Group
+- "Deny" 규칙이 없음
+- Allow만 가능
+- "차단 규칙(Deny Rule)" 이라는 표현이 나오면 Security Group은 바로 탈락
+
+# AWS Outposts
+- AWS 장비를 회사 데이터센터(온프레미스)에 설치해서 AWS처럼 사용하는 서비스입니다.
+- 지연 시간이 매우 짧고 데이터가 절대 외부 유출 되지 않 
+
+# Storage Lens
+- S3 버킷의 사용량, 비용, 객체 수, 접근 패턴 등을 분석해 주는 모니터링 서비스
+
+# NLB/ALB 보안 그룹 지원 여부
+- ALB : ✅ 가능
+- NLB : ❌ NLB 자체엔 직접 적용 불가
+
+# Launch Template 
+- EC2 생성 설정서
+  - AMI는 어플리케이션 이미지임 서로 다름
+
+# Amazon Elastic Container Registry (ECR)
+- 완전관리형 컨테이너 이미지 저장소(레지스트리)
+- ECR에 이미지 푸시 → Amazon Inspector가 자동으로 그 이미지를 스캔 (보안 검사를 자동으로 실행 )
+- 컨테이너 이미지는 S3 같은 객체 스토리지에 저장하는 게 아니라, ECR 같은 "컨테이너 레지스트리"에 저장하는 게 표준
+
+# Amazon CloudWatch Network Monitor
+- AWS와 온프레미스 간의 네트워크 품질(지연 시간, 패킷 손실 등)을 지속적으로 모니터링하는 서비스
+
+# Application Load Balancer(ALB)
+- 경로 기반 라우팅 가능 (url path 기반 라우팅)
+
+# Amazon Cognito
+- AWS에서 제공하는 로그인(인증) 서비스 -> 회원가입/로그인 시스템을 직접 안 만들어도 되게 해주는 서비스
+-  로그인 성공 시 JWT 토큰 발급
+- 실제 서버 API에도 쓸 수 있음
