@@ -100,6 +100,7 @@
 ### Lambda
 - **서버리스 코드 실행** 서비스 (API 전용 아님 — 이벤트 기반 코드 실행 전반)
 - 최대 실행 시간 **15분** → 장시간 작업은 ECS/Fargate
+- 최대 메모리  : 10GB
 - 트리거: S3 업로드, API Gateway, EventBridge, SNS, SQS 등
 - **권한 정책 방향**
     - 남이 Lambda를 호출 (들어옴) → **리소스 기반 정책**
@@ -431,12 +432,17 @@ VPC (10.0.0.0/16)
 - BI 시각화·대시보드
 - ⚠️ **대시보드는 IAM 역할이 아니라 QuickSight 사용자/그룹에게 공유**
 
-### Glue
-- 서버리스 ETL (Extract → Transform → Load)
+### AWS Glue
+- 대규모 배치 ETL(Extract → Transform → Load)을 위한 서버리스 서비스
+- 클러스터 시작 시간(수 분) 걸림
 - Data Catalog로 데이터 위치·형식 자동 정리
+- 언어 (사실상 둘의 차이는 크게 없음)
+  - Scala : 기본 값
+  - PySpark : 파이썬을 사용 병렬처리에 더 우수
 
 ### EMR
-- 관리형 Hadoop/Spark 빅데이터 클러스터
+- TB~PB급 빅데이터 처리용 클러스터 서비스
+- 직접 관리하는 Spark/Hadoop 빅데이터 클러스터
 - **Instance Fleet + Spot** 조합이 비용 효율 (자주 출제)
 
 ### OpenSearch Service
@@ -602,4 +608,34 @@ VPC (10.0.0.0/16)
 # Amazon Cognito
 - AWS에서 제공하는 로그인(인증) 서비스 -> 회원가입/로그인 시스템을 직접 안 만들어도 되게 해주는 서비스
 -  로그인 성공 시 JWT 토큰 발급
-- 실제 서버 API에도 쓸 수 있음
+- 실제 서버 API에도 쓸 수 있 
+
+# Amazon FSx File Gateway
+- 온프레미스 환경에서 S3 또는 FSx에 접근하기 위한 캐시 게이트웨이
+
+#  Amazon FSx for Windows File Server
+-  "Windows 기반 애플리케이션" + "SMB 프로토콜" + "안정적인 공유 스토리지"
+
+# AWS Security Token Service (STS)
+- 임시 AWS **자격 증명**을 발급하는 서비스
+- 임시 권한 부여 = STS + IAM Role
+
+
+# Lambda 실행 모드
+- Reserved Concurrency (프로버저닝된 동시 실 ) : 이 함수가 사용할 최대 동시 실행 개수 제한
+- Provisioned Concurrency (예약된 동시 실행): 미리 실행 환경을 준비(빠른 응답과 Cold Start 방지 목적)
+
+# 컴퓨팅 세이브 플랜
+- EC2 인스턴스 절약 플랜보다 변경에 자유로움 (인스턴스 유형·크기 변경 가능)
+  - EC2 인스턴스 절약 플랜은 인스턴스 유형 변경 없이 고정 사용
+- 지원: ✅ EC2, Lambda, Fargate
+
+# EC2 Instance Savings Plans
+- 지원: ✅ EC2
+- 불가능: ❌ Lambda | ❌ Fargate
+
+# Reserved Instances (예약 인스턴스)
+- EC만 사용 가능하다.
+- 리전, OS, 인스턴스 패밀리가 고정이다.
+- 전환형 RI (Convertible RI)이 존제함
+  - OS 및 인스턴스 패밀리 및 크기 변경이 가능한 버전
