@@ -205,15 +205,17 @@
   - "글로벌 읽기(다중 리전)" → Aurora Global Database
 
 ### RDS
-- **중지(stop) 최대 7일** → 자동 재시작
-- 한 달 비가동: **스냅샷 + 인스턴스 삭제 → 다음 달 복원**이 가장 비용 효율적
-- **암호화는 생성 후 못 켬** → 스냅샷 → 암호화된 스냅샷 복사 → 새 인스턴스로 복원
+- **중지(stop) 최대 7일** 이후 알아서 자동 재시작
+- 한 달 비가동이 필요할 경우 : **스냅샷 + 인스턴스 삭제 → 다음 달 복원**이 가장 비용 효율적
+- **RDS 암호화는 생성 시만 가능** : 스냅샷 → 암호화된 스냅샷 복사 → 새 인스턴스로 복원
 - **RDS Custom**: OS 접근 가능 (SSH로 설정 파일 변경, 툴 설치 가능)
 - **RDS Proxy**: Lambda + RDS의 "too many connections" 해결 (연결 풀링)
 - 프로비저닝된 IOPS SSD 활성화 : 비용은 비싸지만 높은 처리량과 짧은 지연시간을 가져올 수 있다.
+- 대규모 트래픽의 **수평 확장에는 한계가** 있음 예측 불가능한 대규모 트래픽은 -> **Amazon DynamoDB가 적합**
 
 ### DynamoDB
 - **NoSQL + 트랜잭션 처리 가능 (ACID)**
+- 아이템 크기 제한 : 최대 400KB
 - **PITR (Point-in-Time Recovery)**: 최근 35일, 5분 단위 복구
 - 용량 모드:
     - **On-Demand**: 자동 확장, 사용한 만큼
@@ -756,3 +758,41 @@ VPC (10.0.0.0/16)
 - 블루(운영) / 그린(신규) 환경 생성 → 테스트 → Switchover
 - 다운타임 1분 미만으로 버전 업그레이드 또는 스키마/엔진 변경
 - Rollback이 비교적 쉬움 (문제 발생 시 기존 Blue 환경 유지 가능)
+
+# AWS SCT (Schema Conversion Tool)
+- DB 스키마를 다른 DB 엔진 형식으로 변환
+- 이기종 DB 마이그레이션에서 사용
+- **출제 신호**: "Schema 변환", "Oracle → PostgreSQL", "SQL Server → Aurora PostgreSQL"
+
+# AWS DMS (Database Migration Service)
+- 데이터를 마이그레이션
+- 운영 중인 DB도 최소 다운타임으로 마이그레이션 가능
+- 출제 신호: "데이터 복사", "최소 다운타임 마이그레이션"
+
+# Babelfish for Aurora PostgreSQL
+- PostgresSql이지만 SQL Server 프로토콜(TDS) 및 T-SQL을 지원
+
+
+# AWS Config
+- AWS 리소스의 구성(Configuration) 변경을 기록하고 규정 준수(Compliance)를 지속적으로 평가
+- 회사 정책 위반 시 Non-compliant 표시
+- SNS 알림 및 자동 수정(Auto Remediation) 가능
+```text
+EventBridge와 차이 (매우 중요 ⭐)
+* AWS Config
+→ "현재 상태(State)"를 검사하는 서비스
+→ 리소스가 정책을 준수하는지 확인
+
+* EventBridge
+→ "이벤트(Event)"를 감지하는 서비스
+→ 생성(Create) / 수정(Update) / 삭제(Delete) 시 자동 실행
+```
+
+# Route 53
+> 어디로 보낼지 결정하는 DNS 서비스
+- 장애 조치 : `Failover Routing + Health Check`
+- 트래픽 비율 조절 : `Weighted Routing`
+- 글로벌 서비스 속도 개선 : `Latency Routing`
+- 국가별 서비스 분리 : `Geolocation Routing`
+- AWS 리소스 연결  : `Alias Record`
+- Root Domain 연결  : `Alias`
