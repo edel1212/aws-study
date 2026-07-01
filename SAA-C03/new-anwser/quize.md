@@ -549,15 +549,58 @@ Lambda 함수를 예약된 동시 실행으로 구성합니다. 함수의 이벤
 애플리케이션은 각 사용자의 데이터를 처리하고 요약해야 합니다. 애플리케이션은 가능한 한 빨리 결과를 제공해야 합니다. 애플리케이션을 실행할 때마다 약 1GB의 메모리가 필요하며 30초 이내에 실행이 완료됩니다.
 어떤 솔루션이 애플리케이션을 가장 비용 효율적으로 실행할 수 있을까요?
 
+- A. Scala 작업이 포함된 AWS Glue
 
-A.
-Scala 작업이 포함된 AWS Glue
+- B. Python 스크립트를 사용한 AWS Lambda
 
-B.
-Python 스크립트를 사용한 AWS Lambda
+- C. PySpark 작업이 포함된 AWS Glue
 
-C.
-PySpark 작업이 포함된 AWS Glue
+- D. Apache Spark 스크립트를 사용한 Amazon EMR
 
-D.
-Apache Spark 스크립트를 사용한 Amazon EMR
+---
+
+# Q추가1. 한 전자상거래 회사가 AWS에서 쇼핑몰 애플리케이션을 운영하고 있습니다. 이 애플리케이션은 Amazon Aurora PostgreSQL 클러스터를 기본 데이터베이스로 사용하며 다중 AZ(Multi-AZ) 구성되어 있습니다.
+최근 대규모 할인 행사 기간 동안 데이터베이스에 과도한 읽기 및 쓰기 트래픽이 몰려 애플리케이션 연결 시간 초과(Timeout) 가 발생했습니다.
+다운타임을 최소화하면서 애플리케이션의 확장성과 가용성을 높이는 솔루션은 무엇입니까?
+
+- A. Aurora 클러스터의 상태 변경을 감지하는 Amazon EventBridge 규칙을 생성하고 AWS Lambda 함수로 대응합니다.
+
+- B. Aurora 클러스터를 수정하여 제로 다운타임 패치(Zero Downtime Patching) 기능을 활성화합니다.
+
+- C. Aurora 클러스터에 읽기 전용 복제본(Read Replica) 을 추가하고, 애플리케이션과 데이터베이스 사이에 Amazon RDS Proxy를 배포합니다.
+
+- D. Amazon ElastiCache for Redis를 도입하고, AWS Database Migration Service(AWS DMS) 를 사용하여 데이터를 동기화합니다.
+
+---
+
+# Q추가2. 한 회사의 비즈니스 시스템은 매일 수백 개의 CSV 보고서를 생성하여 로컬 네트워크 공유 폴더에 저장합니다.
+분석 팀은 이 데이터를 생성 직후(Near Real-time) AWS 클라우드로 전송하여 분석에 활용하고자 합니다.
+운영 오버헤드를 최소화하면서 이를 구현하는 솔루션은 무엇입니까?
+
+- A. 매일 업무 종료 시 실행되도록 AWS DataSync 예약 작업을 구성합니다.
+
+- B. Amazon S3 File Gateway를 배포하고, 비즈니스 시스템이 해당 파일 공유에 데이터를 저장하도록 구성합니다.
+
+- C. 파일 생성을 감지하여 AWS DataSync API를 호출하는 애플리케이션을 개발합니다.
+
+- D. SFTP용 AWS Transfer Family 엔드포인트를 배포하고 스크립트를 통해 업로드합니다.
+
+---
+
+# Q추가3. 한 글로벌 물류 회사가 여러 파트너사로부터 배송 데이터를 수집하는 온프레미스 시스템을 운영 중입니다.
+이 회사는 AWS로 인프라를 이전하면서 Amazon S3 API를 통해 데이터를 직접 업로드하는 새로운 애플리케이션을 구축했습니다.
+그러나 일부 레거시 시스템을 사용하는 파트너사들은 여전히 SFTP(SSH File Transfer Protocol)를 통해서만 데이터를 전송할 수 있습니다.
+회사는 서버를 직접 관리하지 않으면서 이러한 파트너사들이 S3 버킷으로 데이터를 안전하게 전송할 수 있도록 지원하고자 합니다.
+운영 오버헤드를 최소화하면서 요구 사항을 충족하는 솔루션은 무엇입니까?
+
+- A. 파트너사의 온프레미스 스토리지에서 Amazon S3로 데이터를 복제하도록
+AWS DataSync 에이전트를 설치 및 구성합니다.
+
+- B. 레거시 파트너사를 위해 AWS Transfer Family 서버를 생성하고
+SFTP 프로토콜을 활성화하여 Amazon S3 버킷과 연결합니다.
+
+- C. Amazon EC2 인스턴스를 프로비저닝하고 SFTP 서버 소프트웨어를 설치한 후,
+파트너사들이 이 인스턴스로 데이터를 업로드하도록 구성합니다.
+
+- D. 레거시 파트너사를 위해 Amazon S3 File Gateway를 배포하고,
+이를 통해 데이터를 업로드하도록 SMB 파일 공유를 구성합니다.
