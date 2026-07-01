@@ -177,14 +177,14 @@
 - 단점: **전송·저장 비용 발생** → "비용 최소화" 키워드면 오답
 
 ### Storage Gateway 4종류
-> 온프레미스와 AWS 스토리지(S3, EBS, Tape)를 연결해주는 브리지(Bridge) 서비스
-> - 기존 서버는 그대로 사용하면서 AWS 스토리지를 사용할 수 있게 해주는 게 Storage Gateway
-| 종류 | 용도 |
+> 온프레미스 애플리케이션이 AWS 스토리지(S3, FSx, Snapshot, Glacier)를 기존 방식(SMB/NFS/iSCSI/Tape) 그대로 사용할 수 있게 해주는 브리지 서비스
+> - AWS 스토리지를 사용할 수 있도록 연결해주는 하이브리드 서비스
+| 종류 | 용도 | 참고 |
 |---|---|
-| **S3 File Gateway** | S3를 파일 서버처럼 사용 SMB/NFS 지원 |
-| **FSx File Gateway** | S3가 아니라 FSx for Windows File Server를 온프레미스에서 쉽게 사용할 수 있게 해주는 Gateway (온프레미스 로컬 캐시) |
-| **Volume Gateway** | 블록(iSCSI)을 클라우드에 백업 |
-| **Tape Gateway** | 가상 테이프로 백업·아카이브 |
+| **S3 File Gateway** | S3를 SMB/NFS 파일 서버처럼 사용(자주 사용하는 데이터는 로컬 캐시에 저장) | 파일 자체를 업로드 하였기에 실시간 사용 가능 |
+| **FSx File Gateway** | S3가 아니라 FSx for Windows File Server를 온프레미스에서 쉽게 사용할 수 있게 해주는 Gateway (온프레미스 로컬 캐시) | - |
+| **Volume Gateway** | EBS Snapshot (S3에 저장) - 블록(iSCSI)을 클라우드에 백업 | 파일이 아닌 스냅샷 이기에 실시간 사용 불가능|
+| **Tape Gateway** | 가상 테이프(VTL)를 S3/Glacier에 저장 | Backup, Archive, VTL |
 
 ### AWS DataSync vs Snowball
 - **DataSync**: 온프레미스 ↔ AWS 대량 파일 **온라인** 전송 (S3, EFS, FSx 등)
@@ -661,3 +661,57 @@ VPC (10.0.0.0/16)
 - Cluster : 같은 Rack에 최대한 가깝게 배치 => 성능 극대화 (높은 IOPS 처리량)
 - Spread : 서로 다른 물리적 하드웨어에 배치 => 장애 분산
 - Partition : 여러 Partition으로 나누어 Rack 장애 영향을 최소화 => 대규모 분산 시스템
+
+# EBS Elastic Volumes
+- EBS 볼륨의 크기(Size), IOPS, 처리량(Throughput)을 온라인으로 변경 가능
+- 대부분의 경우 EC2를 중지하거나 EBS를 Detach할 필요 없음
+- EBS 용량을 늘려도 OS의 파일 시스템은 자동으로 확장되지 않음
+- Linux의 resize2fs, xfs_growfs 등의 명령으로 파일 시스템 확장이 필요
+- EventBridge + Lambda 또는 AWS Systems Manager(SSM)를 이용해 파일 시스템 확장을 자동화할 수 있음
+
+# EFS IA
+> 성능 향상을 위한 기능이 아니라 비용 절감을 위한 기능
+- 자주 사용하지 않는 파일 저장
+- 저장 비용 저렴
+- 접근(읽기) 시 추가 비용 발생
+
+# EFS Lifecycle Policy
+- 일정 기간 미접근 파일을 자동으로 EFS IA로 이동
+- **비용 최적화** 문제의 정답으로 자주 출제
+
+# DataSync
+> 대용량 데이터를 전송할 때 사용하는 서비스
+- **범위**
+    - 온프레미스 <-> AWS 리전 내 서비스
+    - AWS 리전 내 서비스 <-> AWS 리전 내 서비스
+    - 타사 클라우드 <-> AWS 리전 내 서비스
+- **참고사항** :
+    - **task 단위로 복제**
+    - 실시간 복제를 원할 경우 : eventBridge -> Lambda(Optional) -> DataSync 구조 필요
+    - 백그라운드에서 동작함
+
+# AWS TransferFamily
+- 파일을 송/수신할 때 필요한 FTP 서버 역할을 해주는 서비스
+
+  
+# S3 File Gateway
+- S3를 NAS(SMB/NFS)처럼 사용할 수 있게 해주는 브리지 서비스
+- 실제 데이터는 S3에 저장
+- Gateway는 로컬 캐시를 사용하여 성능 향상
+- 파일을 저장하면 거의 실시간으로 S3에 업로드
+- 애플리케이션 수정이 거의 필요 없음
+
+# DataSync
+> "AWS가 지원하는 저장소 간 데이터를 고속으로 복사·동기화하는 서비스
+```text
+- 온프레미스 NAS → S3
+- 온프레미스 NAS → EFS
+- S3 → EFS
+- EFS → FSx
+- FSx → S3
+- AWS 계정 간 저장소
+```
+- 서로 다른 저장소 간 데이터를 Task 단위로 복사/동기화하는 서비스
+- 마이그레이션 및 정기 동기화에 적합
+- S3, EFS, FSx, 온프레미스 NAS 등 다양한 저장소 지원
+- Task를 실행해야 동기화가 수행됨 (예약, 수동, API 호출)
