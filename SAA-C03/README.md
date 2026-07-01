@@ -197,8 +197,12 @@
 ### Aurora
 - MySQL/PostgreSQL 호환
 - Read Replica 최대 15개, Auto Scaling으로 자동 증감
-- Multi-AZ 고가용성
-- **출제 신호: "읽기 복제본 자동 확장"** → Aurora
+- Multi-AZ 스토리지 자동 복제(기본 3AZ, 6개 복사본)
+- Aurora Global Database로 글로벌 읽기 성능 향상
+- **출제 신호**: 
+  - "읽기 복제본 자동 확장" → Aurora
+  - "최대 15개 Read Replica" → Aurora
+  - "글로벌 읽기(다중 리전)" → Aurora Global Database
 
 ### RDS
 - **중지(stop) 최대 7일** → 자동 재시작
@@ -216,8 +220,13 @@
     - **Provisioned**: 처리 용량 미리 지정
 - **DAX**: 마이크로초 단위 인메모리 캐싱
 
-### ElastiCache
-- Redis (영속·복제·Pub/Sub) vs Memcached (단순 캐시, 멀티스레드)
+### Elastic Cache
+- 자주 조회되는 데이터를 빨리 조회하기 위한 캐시 서비스
+- 일부 트래픽을 캐시로 막아 DB부하를 줄여줌
+- 조회 결과가 자주 변경되면 사용 ❌
+- 사용 선택 엔진
+  - Redis : 영속성, 복제, Pub/Sub 지원
+  - Memcached : 단순 캐시, 멀티스레드
 
 ### 스토리지 I/O 병목 → Provisioned IOPS SSD (io1/io2)
 - 출제 신호: "삽입 작업 느림" + "매일 수백만 건 업데이트" → IOPS SSD로 변경
@@ -565,7 +574,9 @@ VPC (10.0.0.0/16)
 - DynamoDB 테이블의 데이터 변경(INSERT/UPDATE/DELETE)을 순서대로 기록하여 Lambda 등의 서비스가 실시간으로 처리할 수 있도록 하는 변경 이벤트 스트림입니다.
 
 # Amazon DynamoDB Accelerator (DAX)
+- 성능을 끌어올리고 싶을 때 사용
 - DynamoDB 전용 인메모리 캐시
+  - 읽기 성능 향상
 
 # ACL(Access Control List)
 - 허용(Allow)과 거부(Deny) 규칙을 적어 놓은 IP 목록(List) 개념
@@ -718,3 +729,30 @@ VPC (10.0.0.0/16)
 - Task를 실행해야 동기화가 수행됨 (예약, 수동, API 호출)
 
 # RDS Multi AZ 배포 (다중 AZ 배포)
+- 기존 DB는 복제해서 대기 DB(standbyDB)로 생성해두고, 장애 발생 시 대기 DB를 주 DB로 전환하는 기능.
+  - standbyDB는 조회할 수 없음 대기만 함
+- 고가용성 확보를 위한 기능 성능 향상에는 도움 ❌
+
+# RDS Multi AZ DB Cluster 
+- 기존 DB를 복제해서 읽기 전용 DB를 2대 이상 더 추가하여 구성하는 것
+- 고가용성 + 읽기 성능 개선 👌
+
+# RDS Read Replica
+- 읽기 전용 DB를 추가하여 읽기 성능 향상 
+- 기존 DB 부하를 줄일 수 있음
+- 고가용성 까지는 부담스럽고 읽기 성능 향상 및 부하 해소를 위해 선택
+
+
+# RDS Region Read Replica (리전 간 읽기 전용 복제본)
+- 대규모 재해 관련 가용성 나올 경우에만 선택
+
+
+# RDS Proxy
+- DB 사이에 DB 연결이 과도하게 많이 일어나는 문제를 막기위한 기능
+- Aurora와 같은 DB 제품도 가능 RDB는 다 가능하다 보면된다.
+- 커넥션 문제 관련 해소 
+
+# RDS Blue/Green Deployment
+- 블루(운영) / 그린(신규) 환경 생성 → 테스트 → Switchover
+- 다운타임 1분 미만으로 버전 업그레이드 또는 스키마/엔진 변경
+- Rollback이 비교적 쉬움 (문제 발생 시 기존 Blue 환경 유지 가능)
