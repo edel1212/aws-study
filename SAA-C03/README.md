@@ -177,10 +177,12 @@
 - 단점: **전송·저장 비용 발생** → "비용 최소화" 키워드면 오답
 
 ### Storage Gateway 4종류
+> 온프레미스와 AWS 스토리지(S3, EBS, Tape)를 연결해주는 브리지(Bridge) 서비스
+> - 기존 서버는 그대로 사용하면서 AWS 스토리지를 사용할 수 있게 해주는 게 Storage Gateway
 | 종류 | 용도 |
 |---|---|
-| **S3 File Gateway** | NFS/SMB 파일을 S3에 |
-| **FSx File Gateway** | 파일을 FSx(Windows)에 (온프레미스 로컬 캐시) |
+| **S3 File Gateway** | S3를 파일 서버처럼 사용 SMB/NFS 지원 |
+| **FSx File Gateway** | S3가 아니라 FSx for Windows File Server를 온프레미스에서 쉽게 사용할 수 있게 해주는 Gateway (온프레미스 로컬 캐시) |
 | **Volume Gateway** | 블록(iSCSI)을 클라우드에 백업 |
 | **Tape Gateway** | 가상 테이프로 백업·아카이브 |
 
@@ -639,3 +641,23 @@ VPC (10.0.0.0/16)
 - 리전, OS, 인스턴스 패밀리가 고정이다.
 - 전환형 RI (Convertible RI)이 존제함
   - OS 및 인스턴스 패밀리 및 크기 변경이 가능한 버전
+ 
+# EBS (Elastic Block Store)
+- EC2 또는 RDS에 연결하여 사용하는 블록 스토리지 (외장 SSD/HDD와 유사)
+- EC2/RDS 전용, 단일 가용 영역(AZ)에서 작동, 고성능 스토리지 유형 존재
+- OS, DB, 애플리케이션 저장에 사용 찐 하드 (S3는 객체저장소임)
+
+# FSx
+> 용도: 높은 처리량과 낮은 지연 시간을 요구하는 **고성능 파일 스토리지 서비스**
+- FSx for Lustre:
+    - 머신러닝, 빅데이터 분석용.
+    - S3 연동 가능
+    - Lustre 자체 프로토콜만 지원 가능
+- FSx for NetApp ONTAP: 윈도우/맥/리눅스 호환, NFS 및 SMB 지원.
+- FSx for Windows File Server: Window 최적화 SMB 프로토콜 전용.
+- FSx for OpenZFS: OpenZFS 환경 그대로 이전이 필요할 경우 사용 NFS 프로토콜 지원.
+
+# Placement Group의 3가지 종류
+- Cluster : 같은 Rack에 최대한 가깝게 배치 => 성능 극대화 (높은 IOPS 처리량)
+- Spread : 서로 다른 물리적 하드웨어에 배치 => 장애 분산
+- Partition : 여러 Partition으로 나누어 Rack 장애 영향을 최소화 => 대규모 분산 시스템
