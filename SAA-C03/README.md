@@ -334,8 +334,13 @@ VPC (10.0.0.0/16)
 - 대규모 DDoS + 무중단 → **Shield Advanced + CloudFront**
 
 ### KMS
-- 암/복호화 키 관리 (복호화도 가능)
-- S3·EBS·RDS 암호화에 광범위 사용
+- 암호화 키 생성 및 관리 (Encrypt/Decrypt 가능)
+- S3, EBS, RDS 등 대부분의 AWS 서비스 암호화에 사용
+- 기본적으로 AWS 관리형 HSM에서 키를 보호
+
+※ CloudHSM이 필요한 경우
+- 일반 KMS 키는 CloudHSM에 저장되지 않음
+- 고객 전용 HSM이 필요하면 KMS Custom Key Store(AWS CloudHSM 기반 KMS 키)를 사용
 
 ### Secrets Manager
 - DB 자격증명·API 키 관리
@@ -375,10 +380,15 @@ VPC (10.0.0.0/16)
 - **FIFO**: 순서 보장 + 정확히 한 번 처리
 - **출제 함정 "큐엔 중복 없는데 처리 결과에 중복"** → 원인: **Visibility Timeout이 너무 짧음** (처리가 끝나기 전 다른 컨슈머가 다시 가져감)
 
-### SNS
+### SNS(Amazon Simple Notification Service)
 - 알림 발행/구독 (Pub/Sub)
 - **데이터 저장 X** (저장은 SQS)
 - SNS + SQS 패턴 = 여러 시스템 팬아웃
+- Email / SMS / HTTP / Lambda 지원
+  - 코드 없이 메세지 전달이 가능
+- 모드
+  - Standard: 순서 보장 X, 중복 가능
+  - FIFO: 순서 + 중복 제어
 
 ### EventBridge
 - AWS 서비스 이벤트 감지 → 규칙에 따라 라우팅 (SNS, Lambda 등)
@@ -448,11 +458,14 @@ VPC (10.0.0.0/16)
   - Scala : 기본 값
   - PySpark : 파이썬을 사용 병렬처리에 더 우수
 
-### EMR
+### Amazon EMR
 - TB~PB급 빅데이터 처리용 클러스터 서비스
 - **직접 관리**하는 Spark/Hadoop 빅데이터 클러스터
 - 빅데이터 처리
 - **Instance Fleet + Spot** 조합이 비용 효율 (자주 출제)
+- Security Configuration 기능 존재 하나의 설정으로 암호화 가능
+  - 전송 중, 저장 시, 로컬 볼륨 암호화를 한 곳에서 모두 관리
+  -  EMR에 특화된 정식 기능이라 가장 직접적이고 완전한 해결책
 
 ### OpenSearch Service
 - 대량 로그 검색·분석·시각화
@@ -509,12 +522,12 @@ VPC (10.0.0.0/16)
 ## 10. 비용 관리
 
 ### 비용 분석 도구
-| 키워드 | 서비스 |
-|---|---|
+| 키워드                       | 서비스 |
+|---------------------------|---|
 | 비용 분석·시각화·심층 분석 + 최소 오버헤드 | **Cost Explorer** |
-| 예산 설정·초과 알림 | **AWS Budgets** |
-| 상세 원시 데이터(라인 아이템) | **CUR (Cost and Usage Report)** (분석엔 QuickSight 등 추가 필요) |
-| 간단한 개요 | **Billing 대시보드** |
+| 예산 설정·초과 알림 및 엑션 기능이 추가됨  | **AWS Budgets** |
+| 상세 원시 데이터(라인 아이템)         | **CUR (Cost and Usage Report)** (분석엔 QuickSight 등 추가 필요) |
+| 간단한 개요                    | **Billing 대시보드** |
 
 ### 비용 최적화 패턴
 - **RDS 1개월 비가동**: 스냅샷 + 인스턴스 삭제 → 다음 달 복원
@@ -660,6 +673,7 @@ VPC (10.0.0.0/16)
 > 용도: 높은 처리량과 낮은 지연 시간을 요구하는 **고성능 파일 스토리지 서비스**
 - FSx for Lustre:
     - 머신러닝, 빅데이터 분석용.
+    - HPC 전용으로 설계된 고성능 파일 시스템 (HPC 대표적인 스토리지 솔루션)
     - S3 연동 가능
     - Lustre 자체 프로토콜만 지원 가능
 - FSx for NetApp ONTAP: 윈도우/맥/리눅스 호환, NFS 및 SMB 지원.
@@ -845,3 +859,83 @@ Root (조직 전체)
 - OLAP
 - BI
 
+# Budgets
+- 비용에 대한 알림을 주거나 action 기능 수행
+- Budgets Actions(예산 작업)  :  별도로 Lambda나 EventBridge를 만들지 않아도, Budgets 자체에서 직접 EC2를 중지시키는 자동화 작업을 설정
+  - 예산 금액 : "실제 지출이 설정한 예산액에 도달했다"는 **실측치 기준**
+  - 예산 비용 : "이번 달에 이 속도로 쓰면 예산을 초과할 것 같다"는 **예측치 기준**
+```text
+AWS Budgets
+   ├── 알림(Alert) 설정: "예산의 100% 도달 시"
+   └── 작업(Action) 설정: "IAM 정책 적용" 또는 "EC2/RDS 중지"
+         → 별도 Lambda, EventBridge 불필요!
+```
+
+# HSM(Hardware Security Module)
+> 사용자가 직접 관리 (AWS가 키를 볼 수 없음) 
+- 암호화 키를 저장
+- 암호화/복호화를 수행
+- 물리적으로 보호되는 전용 하드웨어 장비
+
+# OAC(Origin Access Control)
+- CloudFront가 S3에 접근(업로드 포함) 할 수 있도록 허용하는 최신 방식
+- S3 버킷은 CloudFront를 통해서만 접근 가능하도록 제한 (직접 접근 차단)
+- 최근 CloudFront는 업로드(PUT)까지 지원하도록 발전 (기존엔 GET만 캐싱했지만, 이제 오리진으로 업로드 요청도 전달 가능)
+
+# RDS 백업
+- 자동 스냅샷: 최대 35일 보관
+- 오래 보관: 수동 스냅샷으로 복사
+
+# Kinesis Data Streams
+- 지속적으로 들어오는 데이터를 “실시간으로 저장 + 처리 + 여러 소비자가 동시에 읽게 해주는 스트리밍 버퍼”
+- shard 기반 구조 (partition key로 shard 결정)
+```text
+ProvisionedThroughputExceededException 발생 시
+  1) 전체 throughput 부족 → shard 증가 / on-demand
+  2) 특정 shard 집중 → partition key 확인 (핵심)
+```
+
+# HPC = High Performance Computing (고성능 컴퓨팅)
+- 여러 대의 컴퓨터를 동시에 연결해서, 하나의 컴퓨터로는 도저히 못 할 만큼 어마어마하게 큰 계산을 빠르게 처리하는 방식
+
+#  AWS Control Tower
+- 멀티 계정 관리 + 표준화 환경 자동 구축
+- AWS Organizations 레이어 위 “표준화 + 자동 가드레일 + 보안 베이스라인” 얹는 관리 시스템
+```text
+AWS Control Tower
+        │
+        ▼
+AWS Organizations
+        │
+ ┌──────┴──────┐
+ OU           OU
+ │             │
+Accounts     Accounts
+```
+
+# AWS Security Hub
+- AWS 전반의 보안 상태를 한 곳에서 통합 확인하는 서비스
+- AWS 계정 전체의 보안 결과를 모아서 규정 준수(CSPM) 상태를 평가
+- AWS Best Practices (FSBP) 기준으로 자동 검사
+```text
+* CloudWatch 차이점
+
+CloudWatch = 시스템/리소스 “상태 모니터링”
+Security Hub = “보안 상태/취약점 모니터링”
+```
+
+# Route 53 Resolver 
+- VPC ↔ 온프레미스 DNS를 연결해주는 “DNS 브리지”
+- 인바운드 아웃바운드 기준은 AWS로 함(Rout 53이 아님)
+- “하이브리드 DNS 포워딩 문제”이고 정답은 Route 53 Resolver Outbound Endpoint"이다
+```text
+기준점 = AWS Route 53 Resolver (VPC 내부 DNS)
+
+인바운드(Inbound)
+- 온프레미스 → AWS VPC로 DNS 질의 들어옴
+- 온프레미스에서 AWS 내부 도메인 해석
+
+아웃바운드(Outbound)
+- AWS VPC → 온프레미스로 DNS 질의 나감
+- AWS에서 온프레미스 내부 도메인 해석
+```
