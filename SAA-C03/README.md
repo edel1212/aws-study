@@ -2,18 +2,8 @@
 
 > 시험 키워드 → 정답 매핑 중심 / 모바일·웹에서 빠르게 훑어보는 용도
 
-## 목차
-1. [시험 키워드 빠른 매칭표](#1-시험-키워드-빠른-매칭표-최우선-암기)
-2. [컴퓨팅](#2-컴퓨팅-compute)
-3. [스토리지](#3-스토리지-storage)
-4. [데이터베이스](#4-데이터베이스-database)
-5. [네트워킹 & 콘텐츠 전달](#5-네트워킹--콘텐츠-전달)
-6. [보안 & 자격증명](#6-보안--자격증명)
-7. [메시징 & 통합](#7-메시징--통합)
-8. [분석 & AI/ML](#8-분석--aiml)
-9. [관리 & 모니터링](#9-관리--모니터링)
-10. [비용 관리](#10-비용-관리)
-11. [재해 복구 & 마이그레이션](#11-재해-복구--마이그레이션)
+## 참고 링크
+- [참고자료1](https://velog.io/@zooy/AWS-AWS-Solution-Architect-Associate-SAA-C03-%ED%95%B5%EC%8B%AC-%EC%A0%95%EB%A6%AC)
 
 ---
 
@@ -46,22 +36,22 @@
 | 모범 사례 권장 체크리스트 | **Trusted Advisor** |
 
 ### 스토리지 키워드
-| 키워드 | 정답 |
-|---|---|
-| 예측 불가 액세스 + 자동 비용 최적화 | **S3 Intelligent-Tiering** |
-| 자주 접근 | **S3 Standard** |
-| 가끔 접근 + 다중 AZ | **S3 Standard-IA** |
-| 가끔 접근 + 단일 AZ 허용 + 최저 비용 | **S3 One Zone-IA** |
-| 즉시 접근(ms) + 가끔 사용 | **Glacier Instant Retrieval** |
-| 몇 분~몇 시간 지연 허용 | **Glacier Flexible Retrieval** |
-| 장기 보관(12h+) + 최저 비용 | **Glacier Deep Archive** |
-| 복제 시간 최소화 + 즉시 고I/O + 프로덕션 영향 X | **EBS 스냅샷 + FSR** |
-| 사라져도 OK + 최고 I/O 성능 | **EC2 Instance Store** |
-| 원거리에서 대용량 업로드 | **S3 Transfer Acceleration + Multipart Upload** |
+| 키워드                               | 정답 |
+|-----------------------------------|---|
+| 예측 불가 액세스 + 자동 비용 최적화             | **S3 Intelligent-Tiering** |
+| 자주 접근                             | **S3 Standard** |
+| 가끔 접근 + 다중 AZ                     | **S3 Standard-IA** |
+| 가끔 접근 + 단일 AZ 허용 + 최저 비용          | **S3 One Zone-IA** |
+| 즉시 접근(ms) + 가끔 사용                 | **Glacier Instant Retrieval** |
+| 몇 분~몇 시간 지연 허용                    | **Glacier Flexible Retrieval** |
+| 장기 보관(12h+) + 최저 비용               | **Glacier Deep Archive** |
+| 복제 시간 최소화 + 즉시 고I/O + 프로덕션 영향 X   | **EBS 스냅샷 + FSR** |
+| 사라져도 OK + 최고 I/O 성능               | **EC2 Instance Store** |
+| 원거리에서 대용량 업로드                     | **S3 Transfer Acceleration + Multipart Upload** |
 | Windows 파일(SMB) + 온프레미스·AWS 양쪽 접근 | **FSx for Windows + FSx File Gateway** |
-| Linux/NFS 공유 | **EFS** |
-| WORM 잠금 (삭제·수정 불가) | **S3 Object Lock** |
-| 다운로드 비용을 받는 쪽이 부담 | **S3 Requester Pays** |
+| Linux/NFS 공유                      | **EFS** |
+| WORM 잠금 (삭제·수정 불가) + 버전관리 필수      | **S3 Object Lock** |
+| 다운로드 비용을 받는 쪽이 부담                 | **S3 Requester Pays** |
 
 ### 메시징/스트리밍 키워드
 | 키워드 | 정답 |
@@ -197,12 +187,16 @@
 ### Aurora
 - MySQL/PostgreSQL 호환
 - Read Replica 최대 15개, Auto Scaling으로 자동 증감
+  - 🔍 일반 RDS는 스토리지만 Auto Scaling 함
 - Multi-AZ 스토리지 자동 복제(기본 3AZ, 6개 복사본)
-- Aurora Global Database로 글로벌 읽기 성능 향상
 - **출제 신호**: 
   - "읽기 복제본 자동 확장" → Aurora
   - "최대 15개 Read Replica" → Aurora
   - "글로벌 읽기(다중 리전)" → Aurora Global Database
+    
+### Aurora Global Database (옵션 기능)
+- 전 세계 사용자에게 낮은 읽기 지연을 제공
+- 리전 장애가 발생해도 빠르게 복구
 
 ### RDS
 - **중지(stop) 최대 7일** 이후 알아서 자동 재시작
@@ -428,7 +422,7 @@ VPC (10.0.0.0/16)
 - 구 Kinesis Data Analytics
 
 ### MSK (Managed Streaming for Kafka)
-- 관리형 Kafka
+- Apache Kafka를 AWS가 대신 운영해주는 서비스
 
 ### AppFlow
 - SaaS(Salesforce, Slack, Google Analytics 등) ↔ AWS 데이터 통합
@@ -447,7 +441,7 @@ VPC (10.0.0.0/16)
 - ⚠️ **대시보드는 IAM 역할이 아니라 QuickSight 사용자/그룹에게 공유**
 
 ### AWS Glue
-- 대규모 배치 ETL(Extract → Transform → Load)을 위한 서버리스 서비스
+- 대규모 배치 ETL(Extract → Transform → Load) **서버리스 서비스**
 - 클러스터 시작 시간(수 분) 걸림
 - Data Catalog로 데이터 위치·형식 자동 정리
 - 언어 (사실상 둘의 차이는 크게 없음)
@@ -456,7 +450,8 @@ VPC (10.0.0.0/16)
 
 ### EMR
 - TB~PB급 빅데이터 처리용 클러스터 서비스
-- 직접 관리하는 Spark/Hadoop 빅데이터 클러스터
+- **직접 관리**하는 Spark/Hadoop 빅데이터 클러스터
+- 빅데이터 처리
 - **Instance Fleet + Spot** 조합이 비용 효율 (자주 출제)
 
 ### OpenSearch Service
@@ -796,3 +791,57 @@ EventBridge와 차이 (매우 중요 ⭐)
 - 국가별 서비스 분리 : `Geolocation Routing`
 - AWS 리소스 연결  : `Alias Record`
 - Root Domain 연결  : `Alias`
+
+# Transit Gateway
+- AWS 네트워크의 중앙 라우터(Hub)로, 여러 VPC와 VPN, Direct Connect를 한곳에서 연결하고 라우팅하는 서비스
+
+```text
+        Transit Gateway
+             |
+   -----------------------
+   |      |      |      |
+ VPC A  VPC B  VPC C  VPC D
+```
+
+# Lambda 모드
+- Reserved Concurrency = 동시 실행 수를 예약하고 최대치도 제한
+- Provisioned Concurrency = 실행 환경을 미리 준비하여 Cold Start 제거
+- Reserved는 리소스 보호와 격리, Provisioned는 성능(지연 시간) 개선을 위한 기능입니다.
+
+# AWS Organizations
+> Root와 OU는 AWS Organizations 내부의 관리 단위(컨테이너)
+- 구조도
+  - Root = AWS 계정 ❌
+  - OU = AWS 계정 ❌
+  -  Account = 실제 AWS 계정입니다. ✅
+```text
+AWS Organizations
+
+Root (조직 전체)
+│
+├── OU (부서/환경) : Production
+│      ├── AWS Account A (실제 AWS 계정)
+│      │            ↓
+│      │    IAM User / IAM Role / Resources
+│      │
+│      └── AWS Account B (실제 AWS 계정)
+│
+└── OU : Development
+       ├── AWS Account C
+       └── AWS Account D
+```
+
+# SCP (Service Control Policy)
+
+- AWS Organizations에서 사용하는 서비스 제어 정책
+- 권한 부여 ❌ || 계정이 가질 수 있는 최대 **권한 제한**
+- IAM에서 허용해도 SCP에서 거부하면 실행 불가
+- Root / OU / Account 단위로 적용 가능
+- 여러 AWS 계정에 공통 보안 정책을 적용할 때 사용
+
+# Redshift
+- 데이터 웨어하우스
+- SQL 분석
+- OLAP
+- BI
+
