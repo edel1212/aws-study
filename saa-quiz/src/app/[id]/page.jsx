@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import questions from "../../../data/questions.json";
+import essentialIds from "../../../data/essential-ids.json";
 import QuizClient from "./client";
 
 export function generateStaticParams() {
@@ -16,6 +17,7 @@ export default function QuizPage({ params }) {
       key={question.id}
       question={question}
       total={questions.length}
+      essentialIds={essentialIds}
     />
   );
 }

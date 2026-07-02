@@ -1,15 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
-export default function QuizClient({ question, total }) {
+const MODE_KEY = "saa-quiz-mode";
+
+export default function QuizClient({ question, total, essentialIds }) {
   const answerLetters = question.answer.split(",");
   const isMulti = answerLetters.length > 1;
 
   const [selected, setSelected] = useState(() => new Set());
   const [result, setResult] = useState(null);
   const [logged, setLogged] = useState(false);
+  const [mode, setMode] = useState("all");
+
+  useEffect(() => {
+    const saved = localStorage.getItem(MODE_KEY);
+    if (saved === "essential" || saved === "all") setMode(saved);
+  }, []);
 
   function toggle(letter) {
     if (result) return;
@@ -56,8 +64,24 @@ export default function QuizClient({ question, total }) {
     logEvent("dontknow");
   }
 
-  const prevId = question.id > 1 ? question.id - 1 : null;
-  const nextId = question.id < total ? question.id + 1 : null;
+  let prevId, nextId, positionLabel;
+  if (mode === "essential" && essentialIds?.length) {
+    const idx = essentialIds.indexOf(question.id);
+    if (idx === -1) {
+      // current question isn't in essential list; navigate within full set
+      prevId = question.id > 1 ? question.id - 1 : null;
+      nextId = question.id < total ? question.id + 1 : null;
+      positionLabel = `${question.id} / ${total} · 실전 외`;
+    } else {
+      prevId = idx > 0 ? essentialIds[idx - 1] : null;
+      nextId = idx < essentialIds.length - 1 ? essentialIds[idx + 1] : null;
+      positionLabel = `실전 ${idx + 1} / ${essentialIds.length} (#${question.id})`;
+    }
+  } else {
+    prevId = question.id > 1 ? question.id - 1 : null;
+    nextId = question.id < total ? question.id + 1 : null;
+    positionLabel = `${question.id} / ${total}`;
+  }
 
   return (
     <main style={{ padding: "32px 24px", maxWidth: 900, margin: "0 auto" }}>
@@ -75,7 +99,7 @@ export default function QuizClient({ question, total }) {
           ← 목록
         </Link>
         <span>
-          {question.id} / {total}
+          {positionLabel}
           {isMulti && ` · 다중 선택 ${answerLetters.length}개`}
         </span>
       </nav>

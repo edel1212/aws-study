@@ -1,17 +1,67 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import questions from "../../data/questions.json";
+import essentialIds from "../../data/essential-ids.json";
+
+const MODE_KEY = "saa-quiz-mode";
+const essentialSet = new Set(essentialIds);
 
 export default function Home() {
+  const [mode, setMode] = useState("all");
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(MODE_KEY);
+    if (saved === "essential" || saved === "all") setMode(saved);
+    setReady(true);
+  }, []);
+
+  function pickMode(next) {
+    setMode(next);
+    localStorage.setItem(MODE_KEY, next);
+  }
+
+  const visible =
+    mode === "essential"
+      ? questions.filter((q) => essentialSet.has(q.id))
+      : questions;
+  const firstId = visible[0]?.id ?? 1;
+
+  const tabStyle = (active) => ({
+    padding: "6px 14px",
+    background: active ? "#1a1a1a" : "transparent",
+    border: "1px solid #333",
+    color: active ? "#fff" : "#888",
+    borderRadius: 6,
+    fontSize: 13,
+    cursor: "pointer",
+  });
+
   return (
     <main
       style={{
         padding: "32px 24px",
         maxWidth: 1200,
         margin: "0 auto",
+        visibility: ready ? "visible" : "hidden",
       }}
     >
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        <button onClick={() => pickMode("all")} style={tabStyle(mode === "all")}>
+          전체 {questions.length}
+        </button>
+        <button
+          onClick={() => pickMode("essential")}
+          style={tabStyle(mode === "essential")}
+        >
+          실전 {essentialIds.length}
+        </button>
+      </div>
+
       <Link
-        href="/1"
+        href={`/${firstId}`}
         style={{
           display: "inline-block",
           padding: "10px 20px",
@@ -33,7 +83,7 @@ export default function Home() {
           gap: 6,
         }}
       >
-        {questions.map((q) => (
+        {visible.map((q) => (
           <Link
             key={q.id}
             href={`/${q.id}`}
