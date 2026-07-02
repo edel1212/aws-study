@@ -21,6 +21,10 @@ export default function QuizClient({ question, total, essentialIds }) {
 
   function toggle(letter) {
     if (result) return;
+    if (typeof window !== "undefined") {
+      const sel = window.getSelection();
+      if (sel && sel.toString().length > 0) return;
+    }
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(letter)) {
@@ -142,6 +146,8 @@ export default function QuizClient({ question, total, essentialIds }) {
                 display: "flex",
                 alignItems: "flex-start",
                 gap: 10,
+                userSelect: "text",
+                WebkitUserSelect: "text",
               }}
             >
               <span

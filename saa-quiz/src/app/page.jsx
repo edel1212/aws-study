@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import questions from "../../data/questions.json";
 import essentialIds from "../../data/essential-ids.json";
+import newQuestions from "../../data/new-questions.json";
 
 const MODE_KEY = "saa-quiz-mode";
 const essentialSet = new Set(essentialIds);
+const MODES = new Set(["all", "essential", "new"]);
 
 export default function Home() {
   const [mode, setMode] = useState("all");
@@ -14,7 +16,7 @@ export default function Home() {
 
   useEffect(() => {
     const saved = localStorage.getItem(MODE_KEY);
-    if (saved === "essential" || saved === "all") setMode(saved);
+    if (MODES.has(saved)) setMode(saved);
     setReady(true);
   }, []);
 
@@ -24,10 +26,13 @@ export default function Home() {
   }
 
   const visible =
-    mode === "essential"
+    mode === "new"
+      ? newQuestions
+      : mode === "essential"
       ? questions.filter((q) => essentialSet.has(q.id))
       : questions;
   const firstId = visible[0]?.id ?? 1;
+  const hrefFor = (id) => (mode === "new" ? `/new/${id}` : `/${id}`);
 
   const tabStyle = (active) => ({
     padding: "6px 14px",
@@ -58,10 +63,16 @@ export default function Home() {
         >
           실전 {essentialIds.length}
         </button>
+        <button
+          onClick={() => pickMode("new")}
+          style={tabStyle(mode === "new")}
+        >
+          신규 {newQuestions.length}
+        </button>
       </div>
 
       <Link
-        href={`/${firstId}`}
+        href={hrefFor(firstId)}
         style={{
           display: "inline-block",
           padding: "10px 20px",
@@ -86,7 +97,7 @@ export default function Home() {
         {visible.map((q) => (
           <Link
             key={q.id}
-            href={`/${q.id}`}
+            href={hrefFor(q.id)}
             style={{
               textAlign: "center",
               padding: "10px 4px",
